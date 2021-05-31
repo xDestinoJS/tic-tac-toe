@@ -1,0 +1,171 @@
+<body style="display:flex; align-items:center; justify-content:center;">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sigmar+One&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <style>
+    * {
+      font-family: 'Sigmar One', cursive;
+    }
+
+    .box {
+      width:35px;
+      height:35px;
+      border:1.5px solid black;
+      display:flex;
+      justify-content:center;
+      algin-items:center;
+      border-radius:5px;
+      margin:1px;
+      font-size:25px;
+    }
+    
+    .box:hover {cursor:pointer;}
+  </style>
+  
+
+  
+  <div style="display:flex; flex-direction:column; width:250px; height:100%; align-items:center;">
+    <h1>
+      TIC <i>TAK</i> TOE
+    </h1>
+    
+    <div id="cont" style="width:120; display:flex; flex-wrap:wrap;"> <!-- 20*3 -->
+
+    </div>
+    
+    <p id="info" style="border:1px solid black;  border-radius:5px; padding:5px; width:230px; text-align:center; height:200px; overflow-y:auto; font-weight:normal;">
+      [LOG]
+    </p>
+    
+    <p>
+      CLICK <a info="link" href="" style="color:#5865f2; text-decoration:underline;">HERE</a> TO RESTART
+    </p>
+    <script>document.getElementById("link").href = location.hostname</script>
+  </div>
+
+
+  <script>
+  let player = false
+  
+  for(var i = 1; i < 10; i++){
+    var div = document.createElement("DIV")
+    div.innerHTML = ""
+    div.className = "box"
+    div.id = i
+    div.onclick = function(){ play(this) }
+    document.getElementById("cont").appendChild(div)
+  }
+  
+  function play(that){
+    player = !player
+    that.onclick = null
+    that.innerHTML = player ? 'X' : 'O'
+    document.getElementById("info").innerHTML += `<br> ${that.innerHTML} placed at square ${that.id}`
+    let filled = 0
+    for(var i = 1; i < 10; i++){
+      if(document.getElementById(i).innerHTML != ""){
+        filled = filled + 1
+      }
+    }
+    
+    function won() {
+      document.getElementById("info").innerHTML += `<br> 🏆 - Winner! [${that.innerHTML}]`
+    
+      for(var i = 1; i < 10; i++) {
+        document.getElementById(i).onclick = null
+      }
+    }
+    
+    if(document.getElementById("1").innerHTML == that.innerHTML &&
+        document.getElementById("4").innerHTML == that.innerHTML &&
+        document.getElementById("7").innerHTML == that.innerHTML ||
+        document.getElementById("2").innerHTML == that.innerHTML &&
+        document.getElementById("5").innerHTML == that.innerHTML &&
+        document.getElementById("8").innerHTML == that.innerHTML ||
+        document.getElementById("3").innerHTML == that.innerHTML &&
+        document.getElementById("6").innerHTML == that.innerHTML &&
+        document.getElementById("9").innerHTML == that.innerHTML)
+        {
+          won()
+        }
+    
+    if(filled == 9) {
+      document.getElementById("info").innerHTML += `<br> ❌ - There's no more space on the board!`
+    }
+    
+    if(that.id <= 3){
+      
+      let resX = 0
+      let resY = false
+      
+      for(var i = 1; i < 4; i++) {
+        if(document.getElementById(i).innerHTML == that.innerHTML){
+          resX = resX+1;
+        }
+      }
+
+      
+      
+      if(resX == 3) {
+        won()
+      }
+    }
+    
+    if(that.id <= 6){
+      
+      let res = 0
+      
+      for(var i = 4; i < 7; i++) {
+        if(document.getElementById(i).innerHTML == that.innerHTML){
+          res = res+1;
+        }
+      }
+      
+      if(res == 3) {
+        won()
+      }
+    }
+    
+    if(that.id <= 9){
+      
+      let res = 0
+      
+      for(var i = 7; i < 10; i++) {
+        if(document.getElementById(i).innerHTML == that.innerHTML){
+          res = res+1;
+        }
+      }
+      
+      if(res == 3) {
+        won()
+      }
+    }
+    
+    function diagonalLeft(){
+      if(
+        document.getElementById("1").innerHTML == that.innerHTML &&
+        document.getElementById("5").innerHTML == that.innerHTML &&
+        document.getElementById("9").innerHTML == that.innerHTML
+        )
+      {
+        won()
+      }
+    }
+    
+    function diagonalRight(){
+      if(
+        document.getElementById("3").innerHTML == that.innerHTML &&
+        document.getElementById("5").innerHTML == that.innerHTML &&
+        document.getElementById("7").innerHTML == that.innerHTML
+        )
+      {
+        won()
+      }
+    }
+    
+    if(that.id == 9 || that.id == 1) diagonalLeft()
+    if(that.id == 3 || that.id == 7) diagonalRight()
+  }
+  </script>
+</body>
