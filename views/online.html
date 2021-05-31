@@ -1,0 +1,238 @@
+<div id="online" style="display:flex; align-items:center; justify-content:center;">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sigmar+One&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <script src="/socket.io/socket.io.js"></script>
+  
+  <style>
+    * {
+      font-family: 'Sigmar One', cursive; 
+    }
+
+    .box {
+      width:35px;
+      height:35px;
+      border:1.5px solid black;
+      display:flex;
+      justify-content:center;
+      algin-items:center;
+      border-radius:5px;
+      margin:1px;
+      font-size:25px;
+    }
+    
+    .box:hover {cursor:pointer;}
+  </style>
+  
+
+  
+  <div style="display:flex; flex-direction:column; width:500px; height:100%; align-items:center;">
+    <h1>
+      TIC <i>TAK</i> TOE
+    </h1>
+    
+    <p style="text-align:center;">
+      Send link this to your friend to start playing:
+      <br>
+      <input id="link" value="https://tictaktoe.glitch.com/online/UUID">
+    </p>
+  </div>
+</div>
+
+<div id="game" style="display:none; align-items:center; justify-content:center;">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sigmar+One&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <style>
+    * {
+      font-family: 'Sigmar One', cursive;
+    }
+
+    .box {
+      width:35px;
+      height:35px;
+      border:1.5px solid black;
+      display:flex;
+      justify-content:center;
+      algin-items:center;
+      border-radius:5px;
+      margin:1px;
+      font-size:25px;
+    }
+    
+    .box:hover {cursor:pointer;}
+  </style>
+  
+
+  
+  <div style="display:flex; flex-direction:column; width:250px; height:100%; align-items:center;">
+    <h1>
+      TIC <i>TAK</i> TOE
+    </h1>
+    
+    <div id="cont" style="width:120; display:flex; flex-wrap:wrap;"> <!-- 20*3 -->
+
+    </div>
+    
+    <p id="info" style="border:1px solid black;  border-radius:5px; padding:5px; width:230px; text-align:center; height:200px; overflow-y:auto; font-weight:normal;">
+      [LOG]
+    </p>
+    
+<!--     <p>
+      CLICK <a info="link" href="" style="color:#5865f2; text-decoration:underline;">HERE</a> TO RESTART
+    </p>
+    <script>document.getElementById("link").href = location.hostname</script> -->
+  </div>
+
+
+  <script>
+  let me = true
+      let path = location.pathname.replace("/","").split("/")
+  var socket = io({query: 'uuid=' + path[1]});
+  
+  socket.on('newid', function(id){
+    document.getElementById("link").value = "https://" + location.hostname + "/online/" + id
+    me = false
+  })
+  
+  socket.on('connected', function() {
+      document.getElementById("online").style.display = "none"
+      document.getElementById("game").style.display = "flex"
+  });
+  
+    
+  let player = false
+  
+  for(var i = 1; i < 10; i++){
+    var div = document.createElement("DIV")
+    div.innerHTML = ""
+    div.className = "box"
+    div.id = i
+    div.onclick = function(){ 
+      move({
+        innerHTML: this.innerHTML,
+        className: this.className,
+        id: this.id
+      }) 
+    }
+    document.getElementById("cont").appendChild(div)
+  }
+  
+  function move(that){
+    if(player != me) return
+    socket.emit("move", that)
+  } 
+
+  socket.on('move', function(that) {
+    player = !player
+    document.getElementById(that.id).onclick = null
+    document.getElementById(that.id).innerHTML = player ? 'X' : 'O'
+    document.getElementById("info").innerHTML += `<br> ${document.getElementById(that.id).innerHTML} placed at square ${that.id}`
+    let filled = 0
+    for(var i = 1; i < 10; i++){
+      if(document.getElementById(i).innerHTML != ""){
+        filled = filled + 1
+      }
+    }
+    
+    function won() {
+      document.getElementById("info").innerHTML += `<br> 🏆 - Winner! [${document.getElementById(that.id).innerHTML}]`
+    
+      for(var i = 1; i < 10; i++) {
+        document.getElementById(i).onclick = null
+      }
+    }
+    
+    if(document.getElementById("1").innerHTML == document.getElementById(that.id).innerHTML &&
+        document.getElementById("4").innerHTML == document.getElementById(that.id).innerHTML &&
+        document.getElementById("7").innerHTML == document.getElementById(that.id).innerHTML ||
+        document.getElementById("2").innerHTML == document.getElementById(that.id).innerHTML &&
+        document.getElementById("5").innerHTML == document.getElementById(that.id).innerHTML &&
+        document.getElementById("8").innerHTML == document.getElementById(that.id).innerHTML ||
+        document.getElementById("3").innerHTML == document.getElementById(that.id).innerHTML &&
+        document.getElementById("6").innerHTML == document.getElementById(that.id).innerHTML &&
+        document.getElementById("9").innerHTML == document.getElementById(that.id).innerHTML)
+        {
+          won()
+        }
+    
+    if(filled == 9) {
+      document.getElementById("info").innerHTML += `<br> ❌ - There's no more space on the board!`
+    }
+    
+    if(that.id <= 3){
+      
+      let resX = 0
+      let resY = false
+      
+      for(var i = 1; i < 4; i++) {
+        if(document.getElementById(i).innerHTML == document.getElementById(that.id).innerHTML){
+          resX = resX+1;
+        }
+      }
+
+      
+      
+      if(resX == 3) {
+        won()
+      }
+    }
+    
+    if(that.id <= 6){
+      let res = 0
+      
+      for(var i = 4; i < 7; i++) {
+        if(document.getElementById(i).innerHTML == document.getElementById(that.id).innerHTML){
+          res = res+1;
+        }
+      }
+      
+      if(res == 3) {
+        won()
+      }
+    }
+    
+    if(that.id <= 9){
+      
+      let res = 0
+      
+      for(var i = 7; i < 10; i++) {
+        if(document.getElementById(i).innerHTML == document.getElementById(that.id).innerHTML){
+          res = res+1;
+        }
+      }
+      
+      if(res == 3) {
+        won()
+      }
+    }
+    
+    function diagonalLeft(){
+      if(
+        document.getElementById("1").innerHTML == document.getElementById(that.id).innerHTML &&
+        document.getElementById("5").innerHTML == document.getElementById(that.id).innerHTML &&
+        document.getElementById("9").innerHTML == document.getElementById(that.id).innerHTML
+        )
+      {
+        won()
+      }
+    }
+    
+    function diagonalRight(){
+      if(
+        document.getElementById("3").innerHTML == document.getElementById(that.id).innerHTML &&
+        document.getElementById("5").innerHTML == document.getElementById(that.id).innerHTML &&
+        document.getElementById("7").innerHTML == document.getElementById(that.id).innerHTML
+        )
+      {
+        won()
+      }
+    }
+    
+    if(that.id == 9 || that.id == 1) diagonalLeft()
+    if(that.id == 3 || that.id == 7) diagonalRight()
+  });
+  </script>
+</div>
